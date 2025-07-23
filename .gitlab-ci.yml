@@ -1,0 +1,33 @@
+image: python:3.13
+
+stages:
+- lint
+- test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+  - .cache/pip
+
+before_script:
+- python -m venv venv
+- source venv/bin/activate
+- python -m pip install --upgrade pip
+- echo "Installing dependencies from requirements.txt"
+- pip install -r requirements.txt
+
+linting:
+  stage: lint
+  script:
+  - pip install flake8
+  - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+testing:
+  stage: test
+  script:
+  - pytest --junitxml=report.xml
+  artifacts:
+    reports:
+      junit: report.xml
