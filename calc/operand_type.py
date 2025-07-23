@@ -10,19 +10,19 @@ O = TypeVar("O", bound = CalculatorOperand)
 class OperandType(Generic[O], str, Enum):
     """Обобщенный Enum, представляющий тип операнда и действующий как фабрика."""
 
-    def __new__(cls, str_value: str, service_class: CalculatorService[O], numeric_type: Type[O]):
-        obj = str.__new__(cls, str_value)
-        obj._value_ = str_value
-        obj._service_class = service_class
-        obj._numeric_type = numeric_type
-        return obj
-
     # Определения элементов. Они конкретизируют тип O для каждого элемента.
     # Прямые кавычки нужны для "опережающей ссылки" (forward reference),
     # так как класс NumberType еще не до конца определен в этот момент.
     INTEGER: 'OperandType[int]' = ("integer", CalculatorService[int], int)
     FLOAT: 'OperandType[float]' = ("float", CalculatorService[float], float)
     DECIMAL: 'OperandType[Decimal]' = ("decimal", CalculatorService[Decimal], Decimal)
+
+    def __new__(cls, str_value: str, service_class: CalculatorService[O], numeric_type: Type[O]):
+        obj = str.__new__(cls, str_value)
+        obj._value_ = str_value
+        obj._service_class = service_class
+        obj._numeric_type = numeric_type
+        return obj
 
     @property
     def numeric_type(self) -> Type[O]:
