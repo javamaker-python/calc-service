@@ -1,10 +1,14 @@
-from fastapi.applications import FastAPI
+from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 import pytest
+
 from calc import calculator_api
+from calc.api_respone import ValueErrorDetail
+from main import  value_error_exception_handler
 
 app = FastAPI()
 app.include_router(calculator_api.router)
+app.add_exception_handler(ValueError, value_error_exception_handler)
 client = TestClient(app)
 
 _invalid_input = [
@@ -69,14 +73,7 @@ class TestCalculate:
         """тест на проверку первого операнда"""
 
         response = client.get(f"/{operand_type}/{operation_type}?a={a}&b=1")
-        assert response.status_code == 400
-
-        response_data = response.json()
-        assert "detail" in response_data
-
-        detail = response_data["detail"]
-        assert "невозможно преобразовать значение" in detail
-        assert f"{a}" in detail
+        self._verify_invalid_value(response, f"{a}")
 
     @pytest.mark.parametrize(
         ("operation_type", "operand_type", "b"), [
@@ -88,11 +85,14 @@ class TestCalculate:
         """тест на проверку второго операнда"""
 
         response = client.get(f"/{operand_type}/{operation_type}?a=1&b={b}")
-        assert response.status_code == 400
+        self._verify_invalid_value(response, f"{b}")
 
-        response_data = response.json()
-        assert "detail" in response_data
+    def _verify_invalid_value(self, response, invalid_value: str):
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-        detail = response_data["detail"]
-        assert "невозможно преобразовать значение" in detail
-        assert f"{b}" in detail
+        response_data: ValueErrorDetail = ValueErrorDetail.model_validate(response.json())
+        assert response_data.error_type == "ValueError"
+
+        message = response_data.message
+        assert "невозможно преобразовать значение" in message
+        assert invalid_value in message

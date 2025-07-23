@@ -43,5 +43,5 @@ class CalculatorService[T: CalculatorOperand]():
 
         try:
             return self._target_type(a / b, a)
-        except ZeroDivisionError as e:
-            raise ValueError(f"нельзя делить на ноль: {a} / {b}!", e);
+        except ZeroDivisionError:
+            raise ValueError(f"нельзя делить на ноль: {a} / {b}!");
