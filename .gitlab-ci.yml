@@ -1,4 +1,4 @@
-image: python:3.12
+image: python:3.13
 
 stages:
 - lint
@@ -41,9 +41,9 @@ pages:
   stage: deploy
   script:
   - mv htmlcov/ public/
-  - echo "Coverage report is available at: https://${CI_PROJECT_NAMESPACE}.gitlab.io/${CI_PROJECT_NAME}/"
+  - 'echo "Coverage report is available at: https://${CI_PROJECT_NAMESPACE}.gitlab.io/${CI_PROJECT_NAME}/"'
   artifacts:
     paths:
     - public
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
